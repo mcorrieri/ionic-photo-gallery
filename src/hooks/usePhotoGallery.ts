@@ -18,15 +18,18 @@ export function usePhotoGallery() {
   useEffect(() => {
     const loadSaved = async () => {
       const { value } = await Storage.get({ key: PHOTO_STORAGE });
-      const photosInStorage = (value ? JSON.parse(value) : []) as UserPhoto[];
 
-      for (let photo of photosInStorage) {
-        const file = await Filesystem.readFile({
-          path: photo.filepath,
-          directory: Directory.Data,
-        });
-        // Web platform only: Load the photo as base64 data
-        photo.webviewPath = `data:image/jpeg;base64,${file.data}`;
+      const photosInStorage = (value ? JSON.parse(value) : []) as UserPhoto[];
+      // If running on the web...
+      if (!isPlatform("hybrid")) {
+        for (let photo of photosInStorage) {
+          const file = await Filesystem.readFile({
+            path: photo.filepath,
+            directory: Directory.Data,
+          });
+          // Web platform only: Load the photo as base64 data
+          photo.webviewPath = `data:image/jpeg;base64,${file.data}`;
+        }
       }
       setPhotos(photosInStorage);
     };
